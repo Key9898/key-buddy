@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "**/*.stories.tsx",
+    "**/*.stories.ts",
+    "**/*.test.tsx",
+    "**/*.test.ts"
+  ]
+}
