@@ -1,0 +1,65 @@
+appId: com.keybuddy.app
+productName: KeyBuddy
+copyright: Copyright © 2026 KeyBuddy Team
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+
+# Auto-update via GitHub Releases
+publish:
+  provider: github
+
+# Windows - NSIS Installer
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+  icon: assets/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: KeyBuddy
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+  license: LICENSE
+
+# macOS - DMG
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: assets/icon.icns
+  category: public.app-category.utilities
+  darkModeSupport: true
+
+dmg:
+  backgroundColor: '#ffffff'
+  window:
+    width: 540
+    height: 380
+
+# Linux - AppImage + deb
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  icon: assets/icon.png
+  category: Utility
+  description: Cross-platform desktop input overlay for streamers and content creators
+  maintainer: KeyBuddy Team

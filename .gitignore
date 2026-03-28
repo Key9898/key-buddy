@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-electron/
+release/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Storybook
+storybook-static/
+
+# Compiled JS artifacts in source directories
+src/**/*.js
+
+# Claude Code / AI Tools
+.claude/
+.agents/
+.trae/skills/
+skills-lock.json
