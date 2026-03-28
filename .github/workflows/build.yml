@@ -32,7 +32,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libxss1 libnss3 libasound2-dev portaudio19-dev
 
+      - name: Install dependencies (Linux - skip native module build)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm ci --ignore-scripts
+
       - name: Install dependencies
+        if: matrix.os != 'ubuntu-latest'
         run: npm ci
 
       - name: Build frontend
