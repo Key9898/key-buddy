@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, macos-latest, ubuntu-22.04]
 
     runs-on: ${{ matrix.os }}
 
@@ -27,17 +27,17 @@ jobs:
           cache: 'npm'
 
       - name: Install Linux build dependencies
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libxss1 libnss3 libasound2-dev portaudio19-dev
 
       - name: Install dependencies (Linux - skip native module build)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: npm ci --ignore-scripts
 
       - name: Install dependencies
-        if: matrix.os != 'ubuntu-latest'
+        if: matrix.os != 'ubuntu-22.04'
         run: npm ci
 
       - name: Build frontend
@@ -59,7 +59,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package for Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: npx electron-builder --linux --publish ${{ startsWith(github.ref, 'refs/tags/v') && 'always' || 'never' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
