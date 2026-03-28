@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-03-28
 
 ### Added - 2026-03-28
 
@@ -143,8 +143,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Description               |
 | ------- | ---------- | ------------------------- |
+| 0.1.0   | 2026-03-28 | Initial release (MVP)     |
 | 0.0.0   | 2026-03-28 | Project planning complete |
 
 ---
 
-_Next milestone: Phase 1 MVP Development_
+_Next milestone: v0.2.0 — Microphone reactive, multiple characters, auto-update_
