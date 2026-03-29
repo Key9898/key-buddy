@@ -35,5 +35,12 @@ src/**/*.js
 # Claude Code / AI Tools
 .claude/
 .agents/
-.trae/skills/
+.trae/
 skills-lock.json
+
+# AI Agent Rules & Session Files (IDE-specific configs)
+.cursorrules
+CLAUDE.md
+CODEX.md
+.github/copilot-instructions.md
+docs/SESSION_SUMMARY.md
