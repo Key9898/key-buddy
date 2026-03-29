@@ -142,6 +142,30 @@ export async function endWindowDrag(): Promise<{ x: number; y: number } | null> 
   }
 }
 
+export async function minimizeWindow(): Promise<boolean> {
+  const api = getElectronAPI()
+  if (!api) return false
+
+  try {
+    return await api.minimizeWindow()
+  } catch (error) {
+    console.error('Failed to minimize window:', error)
+    return false
+  }
+}
+
+export async function showWindow(): Promise<boolean> {
+  const api = getElectronAPI()
+  if (!api) return false
+
+  try {
+    return await api.showWindow()
+  } catch (error) {
+    console.error('Failed to show window:', error)
+    return false
+  }
+}
+
 export async function getMonitors(): Promise<Monitor[]> {
   const api = getElectronAPI()
   if (!api) return []

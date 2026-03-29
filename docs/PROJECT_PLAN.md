@@ -2,16 +2,23 @@
 
 ## Project Overview
 
-**KeyBuddy** is a cross-platform desktop input overlay application with an animated character that reacts to user inputs. Designed for streamers and content creators.
+**KeyBuddy** is a cross-platform desktop input overlay application with an animated character that reacts to user inputs. Designed for streamers and content creators. Combines the best of **BongoCat** (keyboard/mouse visualizer) and **Desktop Mate** (cute character companion).
 
-| Attribute        | Value                       |
-| ---------------- | --------------------------- |
-| **Name**         | KeyBuddy                    |
-| **Type**         | Desktop Application         |
-| **Platforms**    | Windows, macOS, Linux       |
-| **Target Users** | Streamers, Content Creators |
-| **License**      | Open Source (MIT)           |
-| **Cost**         | $0 (All Free Tiers)         |
+| Attribute        | Value                                   |
+| ---------------- | --------------------------------------- |
+| **Name**         | KeyBuddy                                |
+| **Type**         | Desktop Application + Marketing Website |
+| **Platforms**    | Windows, macOS, Linux                   |
+| **Target Users** | Streamers, Content Creators             |
+| **License**      | Open Source (MIT)                       |
+| **Cost**         | $0 (All Free Tiers)                     |
+
+### Core Concept
+
+- **BongoCat Style**: Keyboard/mouse input visualization
+- **Desktop Mate Style**: Cute character that follows your inputs
+- **Compact & Draggable**: Small overlay window (350x350 default)
+- **Marketing Website**: Landing page with interactive preview
 
 ---
 
@@ -66,6 +73,28 @@
 
 ## Architecture
 
+### Single Codebase, Dual Environment
+
+KeyBuddy uses **environment detection** to serve different experiences from a single codebase:
+
+```tsx
+function App() {
+  const isElectron = window.electronAPI !== undefined
+
+  if (isElectron) {
+    return <DesktopApp /> // Compact Overlay
+  }
+  return <LandingPage /> // Marketing Website
+}
+```
+
+| Environment | Experience      | Purpose               |
+| ----------- | --------------- | --------------------- |
+| Electron    | Desktop Overlay | Main application      |
+| Browser     | Landing Page    | Marketing & downloads |
+
+### Desktop App Architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      USER'S COMPUTER                         │
@@ -82,8 +111,8 @@
 │  │  │  │ (keyboard)    │──┼──┼─→│ (Framer Motion)   │  │ │ │
 │  │  │  └───────────────┘  │  │  └───────────────────┘  │ │ │
 │  │  │  ┌───────────────┐  │  │  ┌───────────────────┐  │ │ │
-│  │  │  │ uiohook-napi  │  │  │  │ Keyboard Overlay  │  │ │ │
-│  │  │  │ (mouse)       │──┼──┼─→│ (DaisyUI)         │  │ │ │
+│  │  │  │ uiohook-napi  │  │  │  │ Draggable Handle  │  │ │ │
+│  │  │  │ (mouse)       │──┼──┼─→│ (Compact UI)      │  │ │ │
 │  │  │  └───────────────┘  │  │  └───────────────────┘  │ │ │
 │  │  │  ┌───────────────┐  │  │  ┌───────────────────┐  │ │ │
 │  │  │  │ naudiodon     │  │  │  │ Settings Panel    │  │ │ │
@@ -100,8 +129,43 @@
 │  └────────────────────────────────────────────────────────┘ │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
+```
+
+### Marketing Website Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      WEB BROWSER                             │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │                  React App (Vercel)                    │ │
+│  │                                                        │ │
+│  │  ┌─────────────────────────────────────────────────┐  │ │
+│  │  │              Landing Page                        │  │ │
+│  │  │                                                  │  │ │
+│  │  │  ┌─────────────┐  ┌─────────────────────────┐   │  │ │
+│  │  │  │ Hero        │  │ Interactive Preview     │   │  │ │
+│  │  │  │ Section     │  │ (Mini Character Card)   │   │  │ │
+│  │  │  └─────────────┘  └─────────────────────────┘   │  │ │
+│  │  │                                                  │  │ │
+│  │  │  ┌─────────────┐  ┌─────────────────────────┐   │  │ │
+│  │  │  │ Features    │  │ Download Center         │   │  │ │
+│  │  │  │ Section     │  │ (Win/Mac/Linux)         │   │  │ │
+│  │  │  └─────────────┘  └─────────────────────────┘   │  │ │
+│  │  │                                                  │  │ │
+│  │  │  ┌─────────────────────────────────────────┐    │  │ │
+│  │  │  │ Onboarding Guide                        │    │  │ │
+│  │  │  │ (How to use)                            │    │  │ │
+│  │  │  └─────────────────────────────────────────┘    │  │ │
+│  │  └─────────────────────────────────────────────────┘  │ │
+│  │                                                        │ │
+│  │  Shared Components:                                    │ │
+│  │  └── Character (same as Desktop)                       │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
                               │
-                              │ Internet (Phase 2+)
+                              │ Internet
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                      CLOUD SERVICES                          │
@@ -139,23 +203,30 @@ keybuddy/
 ├── src/                           # React frontend
 │   ├── components/                # Modular Component Architecture
 │   │   │
-│   │   ├── Character/             # Main animated character
+│   │   ├── Character/             # Main animated character (SHARED)
 │   │   │   ├── Character.tsx      # UI component
 │   │   │   ├── Character.stories.tsx
 │   │   │   ├── animations.ts      # Framer Motion variants
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── Overlay/               # Input overlay display
+│   │   ├── Overlay/               # Desktop: Compact overlay
 │   │   │   ├── Overlay.tsx
-│   │   │   ├── KeyboardOverlay.tsx
-│   │   │   ├── MouseOverlay.tsx
+│   │   │   ├── DraggableHandle.tsx
 │   │   │   ├── Overlay.stories.tsx
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── Settings/              # Settings panel
+│   │   ├── Settings/              # Desktop: Settings panel
 │   │   │   ├── Settings.tsx
 │   │   │   ├── SettingsPanel.tsx
 │   │   │   ├── Settings.stories.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── Landing/               # Web: Marketing page (NEW)
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── InteractivePreview.tsx
+│   │   │   ├── FeaturesSection.tsx
+│   │   │   ├── DownloadCenter.tsx
+│   │   │   ├── OnboardingGuide.tsx
 │   │   │   └── index.ts
 │   │   │
 │   │   └── ui/                    # Shared UI components
@@ -179,7 +250,8 @@ keybuddy/
 │   │   ├── useMicrophone.ts       # Mic input logic
 │   │   ├── useSettings.ts         # Settings state
 │   │   ├── useCharacter.ts        # Character state
-│   │   └── useIPC.ts              # Electron IPC
+│   │   ├── useIPC.ts              # Electron IPC
+│   │   └── useEnvironment.ts      # Environment detection (NEW)
 │   │
 │   ├── utils/                     # API & Functions
 │   │   ├── ipc.ts                 # Electron IPC helpers
@@ -206,7 +278,9 @@ keybuddy/
 │   ├── styles/
 │   │   └── global.css             # DaisyUI cupcake theme
 │   │
-│   ├── App.tsx
+│   ├── App.tsx                    # Environment detection
+│   ├── DesktopApp.tsx             # Desktop overlay app (NEW)
+│   ├── LandingPage.tsx            # Marketing website (NEW)
 │   └── main.tsx
 │
 ├── characters/                    # Character assets
@@ -238,25 +312,25 @@ keybuddy/
 
 ### Phase 1: MVP (Estimated: 2 months)
 
-**Goal:** Working product with basic features
+**Goal:** Working product with basic features + Marketing Website
 
-#### Features
+#### Desktop App Features
 
-- [ ] **Transparent Overlay Window**
+- [ ] **Compact Overlay Window**
+  - [ ] Default size: 350x350 pixels
   - [ ] Always on top
+  - [ ] Transparent background
   - [ ] Click-through enabled
-  - [ ] Resizable & draggable
+  - [ ] Draggable handle for repositioning
   - [ ] Multi-monitor support
 
 - [ ] **Keyboard Detection & Display**
   - [ ] Global keyboard hooks
-  - [ ] Visual keyboard overlay
   - [ ] Key press animations
   - [ ] Modifier key handling (Shift, Ctrl, Alt)
 
 - [ ] **Mouse Detection & Display**
   - [ ] Global mouse hooks
-  - [ ] Mouse position tracking
   - [ ] Click animations (left, right, middle)
   - [ ] Scroll wheel detection
 
@@ -267,31 +341,67 @@ keybuddy/
   - [ ] Mouse movement animation
   - [ ] Click reaction animation
 
-- [ ] **Settings Panel**
+- [ ] **Settings Panel (Compact)**
   - [ ] Position adjustment
   - [ ] Size adjustment
   - [ ] Opacity control
   - [ ] Character selection (default only)
   - [ ] Startup on boot option
-  - [ ] Show/hide keyboard overlay toggle
+
+#### Marketing Website Features
+
+- [ ] **Hero Section**
+  - [ ] Catchy headline & tagline
+  - [ ] Call-to-action buttons
+  - [ ] Animated background
+
+- [ ] **Interactive Preview**
+  - [ ] Mini character card
+  - [ ] Demo keyboard/mouse input
+  - [ ] Shows character reactions
+
+- [ ] **Features Section**
+  - [ ] Key features grid
+  - [ ] Animated icons
+  - [ ] Responsive layout
+
+- [ ] **Download Center**
+  - [ ] Windows download button
+  - [ ] macOS download button
+  - [ ] Linux download button
+  - [ ] Version info display
+
+- [ ] **Onboarding Guide**
+  - [ ] Step-by-step instructions
+  - [ ] Screenshots/GIFs
+  - [ ] Tips for streamers
 
 #### Technical Tasks
 
-- [ ] Initialize project (Electron + React + Vite)
-- [ ] Setup TypeScript configuration
-- [ ] Setup Tailwind CSS + DaisyUI (cupcake theme)
-- [ ] Setup Zustand store
-- [ ] Implement IPC communication (main ↔ renderer)
-- [ ] Implement keyboard hooks (uiohook-napi)
-- [ ] Implement mouse hooks (uiohook-napi)
-- [ ] Create character component with Framer Motion
-- [ ] Create keyboard overlay component
-- [ ] Create settings panel component
-- [ ] Implement settings persistence (JSON file)
-- [ ] Setup Electron Builder for distribution
-- [ ] Test on Windows
-- [ ] Test on macOS
-- [ ] Test on Linux
+- [ ] **Environment Detection**
+  - [ ] Create useEnvironment hook
+  - [ ] Update App.tsx for dual environment
+  - [ ] Create DesktopApp.tsx
+  - [ ] Create LandingPage.tsx
+
+- [ ] **Desktop App**
+  - [ ] Update electron/main.ts for compact window
+  - [ ] Implement draggable handle
+  - [ ] Create compact settings panel
+  - [ ] Test on Windows
+  - [ ] Test on macOS
+  - [ ] Test on Linux
+
+- [ ] **Marketing Website**
+  - [ ] Create Landing components
+  - [ ] Setup Vercel deployment
+  - [ ] Configure routing (if needed)
+  - [ ] Optimize for SEO
+
+- [ ] **Shared**
+  - [ ] Ensure Character works in both environments
+  - [ ] Setup demo mode for web preview
+  - [ ] Configure build for both targets
 
 #### Distribution
 
@@ -398,15 +508,17 @@ keybuddy/
 
 ## Key Differentiators
 
-| Feature     | Bongo Cat    | KeyBuddy                 |
-| ----------- | ------------ | ------------------------ |
-| Platform    | Windows only | Windows, Mac, Linux      |
-| Microphone  | ❌           | ✅ Audio reactive        |
-| Characters  | Cat only     | Multiple + custom upload |
-| Open Source | ❌           | ✅                       |
-| Settings    | Basic        | Advanced                 |
-| Auto-update | ❌           | ✅                       |
-| Community   | ❌           | ✅ (Phase 3)             |
+| Feature     | Bongo Cat    | Desktop Mate | KeyBuddy                     |
+| ----------- | ------------ | ------------ | ---------------------------- |
+| Platform    | Windows only | Windows only | Windows, Mac, Linux          |
+| Microphone  | ❌           | ❌           | ✅ Audio reactive            |
+| Characters  | Cat only     | Limited      | Multiple + custom upload     |
+| Open Source | ❌           | ❌           | ✅                           |
+| Settings    | Basic        | Basic        | Advanced                     |
+| Auto-update | ❌           | ❌           | ✅                           |
+| Community   | ❌           | ❌           | ✅ (Phase 3)                 |
+| Marketing   | ❌           | ❌           | ✅ Landing page + onboarding |
+| Compact UI  | ❌           | ❌           | ✅ 350x350 draggable overlay |
 
 ---
 
@@ -499,9 +611,26 @@ Theme is applied via `data-theme="cupcake"` attribute in `index.html`.
 
 | Phase                    | Status      | Start Date | End Date |
 | ------------------------ | ----------- | ---------- | -------- |
-| Phase 1: MVP             | Not Started | -          | -        |
+| Phase 1: MVP             | In Progress | 2026-03-01 | -        |
 | Phase 2: Differentiation | Not Started | -          | -        |
 | Phase 3: Innovation      | Not Started | -          | -        |
+
+### Phase 1 Progress
+
+| Task                  | Status       |
+| --------------------- | ------------ |
+| Project Setup         | ✅ Completed |
+| Electron Main Process | ✅ Completed |
+| Input Detection       | ✅ Completed |
+| Audio Detection       | ✅ Completed |
+| Window Management     | ✅ Completed |
+| Settings Persistence  | ✅ Completed |
+| Character Component   | ✅ Completed |
+| Settings Panel        | ✅ Completed |
+| Environment Detection | 🔄 Pending   |
+| Desktop App Refactor  | 🔄 Pending   |
+| Landing Page          | 🔄 Pending   |
+| Vercel Deployment     | 🔄 Pending   |
 
 ---
 
@@ -872,6 +1001,365 @@ if (process.env.NODE_ENV === 'development') {
 
 ---
 
+## Character Marketplace
+
+### Overview
+
+Character Marketplace သည် users တွေကို ကွဲပြားတဲ့ character designs တွေကို ရွေးချယ်ခွင့်ပေးတဲ့ system တစ်ခုဖြစ်ပါတယ်။ Landing Page မှာ Character Hub (Gallery) နဲ့ Desktop App မှာ Visual Character Picker တို့ကို ပေါင်းစပ်ထားပါတယ်။
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CHARACTER MARKETPLACE                         │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │                  Character Registry                          ││
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           ││
+│  │  │BongoCat │ │ShibaMate│ │NeonMate │ │  ...    │           ││
+│  │  │ (free)  │ │ (free)  │ │(premium)│ │         │           ││
+│  │  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘           ││
+│  │       └───────────┴───────────┴───────────┘                 ││
+│  │                           │                                  ││
+│  │                    ┌──────▼──────┐                          ││
+│  │                    │   Registry  │                          ││
+│  │                    │    Index    │                          ││
+│  │                    └──────┬──────┘                          ││
+│  └───────────────────────────┼─────────────────────────────────┘│
+│                              │                                   │
+│  ┌───────────────────────────┼─────────────────────────────────┐│
+│  │                     UI Layer                                 ││
+│  │  ┌───────────────┐  ┌──────▼──────┐  ┌───────────────────┐  ││
+│  │  │ Landing Page  │  │  Settings   │  │   Desktop App     │  ││
+│  │  │ Character Hub │  │   Panel     │  │   Character       │  ││
+│  │  │ (Gallery)     │  │ (Picker)    │  │   Renderer        │  ││
+│  │  └───────────────┘  └─────────────┘  └───────────────────┘  ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │                   State Management                           ││
+│  │  ┌─────────────────────────────────────────────────────┐    ││
+│  │  │  Zustand Store: selectedCharacterId, unlockedChars  │    ││
+│  │  └─────────────────────────────────────────────────────┘    ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### File Structure
+
+```
+src/
+├── characters/                          # Character System
+│   ├── base/
+│   │   ├── CharacterBase.tsx            # Base component interface
+│   │   ├── CharacterProps.ts            # Shared props type
+│   │   └── index.ts
+│   │
+│   ├── BongoCat/                        # Character 1: Classic Cat
+│   │   ├── BongoCat.tsx                 # Component
+│   │   ├── BongoCat.stories.tsx         # Storybook
+│   │   ├── animations.ts                # Framer Motion variants
+│   │   ├── assets/
+│   │   │   ├── thumbnail.png            # Gallery thumbnail
+│   │   │   ├── idle/                    # Idle frames
+│   │   │   ├── typing/                  # Typing frames
+│   │   │   ├── mouse/                   # Mouse frames
+│   │   │   └── click/                   # Click frames
+│   │   └── index.ts
+│   │
+│   ├── ShibaMate/                       # Character 2: Shiba Dog
+│   │   ├── ShibaMate.tsx
+│   │   ├── ShibaMate.stories.tsx
+│   │   ├── animations.ts
+│   │   ├── assets/
+│   │   └── index.ts
+│   │
+│   ├── NeonMate/                        # Character 3: Lightning Storm
+│   │   ├── NeonMate.tsx
+│   │   ├── NeonMate.stories.tsx
+│   │   ├── animations.ts
+│   │   ├── assets/
+│   │   └── index.ts
+│   │
+│   ├── registry/
+│   │   ├── characterRegistry.ts         # All characters metadata
+│   │   ├── characterLoader.ts           # Lazy loading utility
+│   │   └── index.ts
+│   │
+│   └── index.ts
+│
+├── components/
+│   ├── Character/                       # Character Renderer
+│   │   ├── CharacterRenderer.tsx        # Dynamic character loader
+│   │   ├── CharacterPicker.tsx          # Settings: Visual picker
+│   │   ├── CharacterCard.tsx            # Gallery card component
+│   │   └── index.ts
+│   │
+│   ├── Landing/
+│   │   ├── CharacterHub.tsx             # Gallery section
+│   │   └── ...
+│   │
+│   └── Settings/
+│       ├── SettingsPanel.tsx            # Updated with CharacterPicker
+│       └── ...
+│
+├── hooks/
+│   ├── useCharacter.ts                  # Character state hook
+│   ├── useCharacterRegistry.ts          # Registry access hook
+│   └── ...
+│
+├── stores/
+│   ├── useCharacterStore.ts             # Character state
+│   └── useStore.ts
+│
+└── types/
+    ├── character.ts                     # Character types
+    └── index.ts
+```
+
+### Type Definitions
+
+```typescript
+// src/types/character.ts
+
+export type CharacterTier = 'free' | 'premium'
+export type CharacterCategory = 'animal' | 'fantasy' | 'minimal' | 'seasonal'
+export type AnimationType = 'idle' | 'typing' | 'mouse' | 'click' | 'speaking'
+
+export interface AnimationConfig {
+  idle: { frames: number; fps: number; loop: boolean }
+  typing: { frames: number; fps: number; loop: boolean }
+  mouse: { frames: number; fps: number; loop: boolean }
+  click: { frames: number; fps: number; loop: boolean }
+  speaking: { frames: number; fps: number; loop: boolean }
+}
+
+export interface CharacterMeta {
+  id: string
+  name: string
+  displayName: string
+  description: string
+  thumbnail: string
+  tier: CharacterTier
+  category: CharacterCategory
+  tags: string[]
+  animations: AnimationConfig
+  component: React.LazyExoticComponent<React.ComponentType<CharacterProps>>
+}
+
+export interface CharacterProps {
+  state: AnimationType
+  inputPosition?: { x: number; y: number }
+  size: number
+  className?: string
+}
+
+export interface CharacterState {
+  selectedCharacterId: string
+  unlockedCharacters: string[]
+  setSelectedCharacter: (id: string) => void
+  unlockCharacter: (id: string) => void
+  isCharacterUnlocked: (id: string) => boolean
+}
+```
+
+### Character Registry Example
+
+```typescript
+// src/characters/registry/characterRegistry.ts
+
+import { lazy } from 'react'
+import type { CharacterMeta } from '@/types/character'
+
+export const characterRegistry: CharacterMeta[] = [
+  {
+    id: 'bongo-cat',
+    name: 'BongoCat',
+    displayName: 'Bongo Cat',
+    description: 'Classic keyboard companion. Paws that dance with your keystrokes.',
+    thumbnail: '/characters/bongo-cat/thumbnail.png',
+    tier: 'free',
+    category: 'animal',
+    tags: ['classic', 'cat', 'cute'],
+    animations: {
+      idle: { frames: 12, fps: 12, loop: true },
+      typing: { frames: 8, fps: 12, loop: true },
+      mouse: { frames: 6, fps: 12, loop: true },
+      click: { frames: 4, fps: 12, loop: false },
+      speaking: { frames: 12, fps: 12, loop: true },
+    },
+    component: lazy(() => import('../BongoCat/BongoCat')),
+  },
+  // ... more characters
+]
+
+export const getCharacterById = (id: string): CharacterMeta | undefined => {
+  return characterRegistry.find((char) => char.id === id)
+}
+
+export const getCharactersByTier = (tier: CharacterTier): CharacterMeta[] => {
+  return characterRegistry.filter((char) => char.tier === tier)
+}
+
+export const getCharactersByCategory = (category: CharacterCategory): CharacterMeta[] => {
+  return characterRegistry.filter((char) => char.category === category)
+}
+```
+
+### Component Specifications
+
+| Component           | Purpose                                    | Location                    |
+| ------------------- | ------------------------------------------ | --------------------------- |
+| `CharacterRenderer` | Dynamic character loader with lazy loading | `src/components/Character/` |
+| `CharacterPicker`   | Visual character selection in Settings     | `src/components/Character/` |
+| `CharacterCard`     | Gallery card for Character Hub             | `src/components/Character/` |
+| `CharacterHub`      | Landing page gallery section               | `src/components/Landing/`   |
+
+### UI/UX Flow
+
+#### Landing Page - Character Hub
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  🐾 Discover Your Buddy                          │
+│              Find the perfect companion for your stream          │
+├─────────────────────────────────────────────────────────────────┤
+│  [All] [Animals] [Fantasy] [Minimal] [Seasonal]     ← Filters   │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│  │   🐱        │  │   🐕        │  │   ⚡        │             │
+│  │  Bongo Cat  │  │ Shiba Mate  │  │ Neon Storm  │             │
+│  │   FREE      │  │   FREE      │  │  PREMIUM    │             │
+│  │  [Preview]  │  │  [Preview]  │  │  [Preview]  │             │
+│  └─────────────┘  └─────────────┘  └─────────────┘             │
+│              [ Download KeyBuddy to Get Started ]                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Settings Panel - Character Picker
+
+```
+┌─────────────────────────────────────────┐
+│  ⚙️ Settings                             │
+├─────────────────────────────────────────┤
+│  🎭 Character                            │
+│  ┌───────┐ ┌───────┐ ┌───────┐         │
+│  │ 🐱    │ │ 🐕    │ │ ⚡    │         │
+│  │ Bongo │ │ Shiba │ │ Neon │         │
+│  │  ✓    │ │       │ │ 🔒   │         │
+│  └───────┘ └───────┘ └───────┘         │
+│                                         │
+│  Selected: Bongo Cat                    │
+│  "Classic keyboard companion"           │
+└─────────────────────────────────────────┘
+```
+
+### Implementation Phases
+
+#### Phase 1: Foundation
+
+| Task | Description                                           | Priority |
+| ---- | ----------------------------------------------------- | -------- |
+| 1.1  | Create `src/types/character.ts` with all interfaces   | High     |
+| 1.2  | Create `src/characters/base/CharacterBase.tsx`        | High     |
+| 1.3  | Create `src/characters/registry/characterRegistry.ts` | High     |
+| 1.4  | Create `src/stores/useCharacterStore.ts`              | High     |
+| 1.5  | Migrate existing Character to `BongoCat` character    | High     |
+
+#### Phase 2: Core Components
+
+| Task | Description                                       | Priority |
+| ---- | ------------------------------------------------- | -------- |
+| 2.1  | Create `CharacterRenderer.tsx` with lazy loading  | High     |
+| 2.2  | Create `CharacterPicker.tsx` for Settings         | High     |
+| 2.3  | Create `CharacterCard.tsx` for Gallery            | Medium   |
+| 2.4  | Update `SettingsPanel.tsx` to use CharacterPicker | High     |
+| 2.5  | Add Storybook stories for new components          | Medium   |
+
+#### Phase 3: Second Character
+
+| Task | Description                                   | Priority |
+| ---- | --------------------------------------------- | -------- |
+| 3.1  | Design ShibaMate character assets             | High     |
+| 3.2  | Create `ShibaMate.tsx` with unique animations | High     |
+| 3.3  | Add ShibaMate to registry                     | High     |
+| 3.4  | Test character switching                      | High     |
+
+#### Phase 4: Landing Page Hub
+
+| Task | Description                         | Priority |
+| ---- | ----------------------------------- | -------- |
+| 4.1  | Create `CharacterHub.tsx` component | High     |
+| 4.2  | Add to LandingPage.tsx              | High     |
+| 4.3  | Create preview modal                | Medium   |
+| 4.4  | Add category filtering              | Medium   |
+| 4.5  | Responsive design                   | High     |
+
+#### Phase 5: Premium Character
+
+| Task | Description                                  | Priority |
+| ---- | -------------------------------------------- | -------- |
+| 5.1  | Design NeonMate character assets             | High     |
+| 5.2  | Create `NeonMate.tsx` with unique animations | High     |
+| 5.3  | Implement premium tier logic                 | Medium   |
+| 5.4  | Add locked state UI                          | Medium   |
+
+### Technical Details
+
+#### Lazy Loading Strategy
+
+```typescript
+// characterLoader.ts
+import { lazy, Suspense } from 'react'
+
+export const loadCharacter = (id: string) => {
+  const character = getCharacterById(id)
+  if (!character) return null
+
+  return lazy(() => import(`../${character.name}/${character.name}.tsx`))
+}
+```
+
+#### Bundle Optimization
+
+```typescript
+// Vite config for code splitting
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'character-bongo': ['src/characters/BongoCat'],
+          'character-shiba': ['src/characters/ShibaMate'],
+          'character-neon': ['src/characters/NeonMate'],
+        },
+      },
+    },
+  },
+})
+```
+
+### Character Tiers
+
+| Tier    | Access          | Characters                    |
+| ------- | --------------- | ----------------------------- |
+| Free    | Default         | BongoCat, ShibaMate           |
+| Premium | Unlock required | NeonMate, Seasonal characters |
+
+### Summary
+
+| Aspect              | Decision                                                        |
+| ------------------- | --------------------------------------------------------------- |
+| **Architecture**    | Registry pattern with lazy loading                              |
+| **State**           | Zustand with persist middleware                                 |
+| **Components**      | CharacterRenderer, CharacterPicker, CharacterCard, CharacterHub |
+| **Characters**      | BongoCat (free), ShibaMate (free), NeonMate (premium)           |
+| **UI Location**     | Settings Panel (Picker) + Landing Page (Hub)                    |
+| **Bundle Strategy** | Code splitting per character                                    |
+| **Storage**         | LocalStorage for unlocked characters                            |
+
+---
+
 ## Keyboard Shortcuts
 
 ### Global Shortcuts (System-wide)
@@ -1086,4 +1574,53 @@ chore(deps): update dependencies
 
 ---
 
-_Last Updated: 2026-03-28_
+_Last Updated: 2026-03-29_
+
+---
+
+## UI/UX Design Guidelines
+
+### Core Design Principles
+
+| Principle        | Description                                 |
+| ---------------- | ------------------------------------------- |
+| **Clean**        | Minimal clutter, clear visual hierarchy     |
+| **Cute**         | Playful, friendly, approachable aesthetics  |
+| **Professional** | Polished, consistent, production-ready look |
+
+### Desktop App Design
+
+| Aspect         | Specification                    |
+| -------------- | -------------------------------- |
+| Default Size   | 350x350 pixels                   |
+| Window Type    | Transparent, Always-on-top       |
+| Interaction    | Draggable handle for positioning |
+| Settings Panel | Compact, collapsible             |
+| Theme          | DaisyUI Cupcake                  |
+
+### Marketing Website Design
+
+| Section          | Purpose                      |
+| ---------------- | ---------------------------- |
+| Hero Section     | Catch attention, main CTA    |
+| Interactive Demo | Show character in action     |
+| Features Grid    | Highlight key capabilities   |
+| Download Center  | Easy access to all platforms |
+| Onboarding Guide | Help new users get started   |
+
+### Responsive Design
+
+| Breakpoint | Target         |
+| ---------- | -------------- |
+| sm         | Mobile devices |
+| md         | Tablets        |
+| lg         | Small laptops  |
+| xl         | Desktops       |
+| 2xl        | Large screens  |
+
+### Accessibility
+
+- WCAG AA color contrast minimum
+- Keyboard navigation support
+- Visible focus indicators
+- Screen reader friendly labels

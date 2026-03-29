@@ -1,4 +1,14 @@
-import { app, BrowserWindow, ipcMain, screen, Display } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  screen,
+  Display,
+  Tray,
+  Menu,
+  nativeImage,
+  NativeImage,
+} from 'electron'
 import path from 'path'
 import {
   startKeyboardListener,
@@ -17,6 +27,7 @@ import { loadSettings, getSettings, updateSettings, resetSettings } from './util
 import type { Settings } from '../src/types'
 
 let mainWindow: BrowserWindow | null = null
+let tray: Tray | null = null
 let inputListenersStarted = false
 let isDragging = false
 let dragStartPos = { x: 0, y: 0 }
@@ -74,6 +85,64 @@ function getMonitors() {
     height: display.bounds.height,
     isPrimary: display.id === screen.getPrimaryDisplay().id,
   }))
+}
+
+function createTray() {
+  const iconPath = path.join(__dirname, '../public/icon.png')
+  let icon: NativeImage
+
+  try {
+    icon = nativeImage.createFromPath(iconPath)
+    if (icon.isEmpty()) {
+      icon = nativeImage.createEmpty()
+    }
+  } catch {
+    icon = nativeImage.createEmpty()
+  }
+
+  tray = new Tray(icon)
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show Window',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show()
+          mainWindow.focus()
+        }
+      },
+    },
+    {
+      label: 'Always on Top',
+      type: 'checkbox',
+      checked: getSettings().window.alwaysOnTop,
+      click: (menuItem) => {
+        if (mainWindow) {
+          mainWindow.setAlwaysOnTop(menuItem.checked)
+          updateSettings({
+            window: { ...getSettings().window, alwaysOnTop: menuItem.checked },
+          })
+        }
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        app.quit()
+      },
+    },
+  ])
+
+  tray.setToolTip('KeyBuddy')
+  tray.setContextMenu(contextMenu)
+
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
 }
 
 function createWindow() {
@@ -334,11 +403,29 @@ function setupIpcHandlers() {
     }
     return settings
   })
+
+  ipcMain.handle('window:minimize', async () => {
+    if (mainWindow) {
+      mainWindow.hide()
+      return true
+    }
+    return false
+  })
+
+  ipcMain.handle('window:show', async () => {
+    if (mainWindow) {
+      mainWindow.show()
+      mainWindow.focus()
+      return true
+    }
+    return false
+  })
 }
 
 app.whenReady().then(() => {
   loadSettings()
   createWindow()
+  createTray()
   setupIpcHandlers()
 
   setTimeout(() => {

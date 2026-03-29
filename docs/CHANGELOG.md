@@ -30,6 +30,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2026-03-29
+
+#### Core Functionality Implementation
+
+- **BongoCat + Desktop Mate Input Visualization**
+  - Keyboard detection with animated paw bounce (typing state)
+  - Mouse movement detection with paw following cursor
+  - Click detection with paw press animation
+  - Character animation system with smooth transitions (idle, typing, mouse, click, speaking)
+  - Fixed KeyboardEvent type: `'keydown' | 'keyup'` → `'down' | 'up'` to match IPC payload
+
+- **Compact & Draggable Overlay Window**
+  - Default window size: 350x350 pixels
+  - DraggableHandle component for window repositioning
+  - Window size slider in settings (250-500px range)
+  - Position controls with Reset Position button
+  - Minimize to System Tray functionality
+  - System tray icon with show/quit menu
+
+- **IPC Functions Added**
+  - `minimizeWindow()` - Minimize window to system tray
+  - `showWindow()` - Restore window from system tray
+  - Updated preload.ts, electron.d.ts, and ipc.ts
+
+- **TypeScript Improvements**
+  - Added global Window interface declaration for electronAPI
+  - Fixed `any` types with proper TypeScript types (LucideIcon)
+  - Fixed unused variable in DesktopApp.tsx
+  - Fixed unescaped quotes in LandingPage.tsx
+
 ### Changed - 2026-03-28
 
 #### Documentation Organization

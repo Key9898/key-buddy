@@ -2,7 +2,7 @@ export type CharacterState = 'idle' | 'typing' | 'mouse' | 'click' | 'speaking'
 
 export interface KeyboardEvent {
   key: string
-  type: 'keydown' | 'keyup'
+  type: 'down' | 'up'
   timestamp: number
 }
 
@@ -54,8 +54,8 @@ export const defaultSettings: Settings = {
   window: {
     x: 100,
     y: 100,
-    width: 400,
-    height: 400,
+    width: 350,
+    height: 350,
     alwaysOnTop: true,
     clickThrough: false,
   },

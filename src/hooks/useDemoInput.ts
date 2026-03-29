@@ -46,7 +46,7 @@ export function useDemoInput() {
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [isDemo, setCharacterState, setIsTyping, setMicLevel])
+  }, [isDemo, setCharacterState, setIsTyping, setMicLevel, setPressedKeys, setMouseButtons])
 
   return { isDemo, setIsDemo }
 }

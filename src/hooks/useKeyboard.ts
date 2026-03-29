@@ -51,7 +51,7 @@ export function useKeyboard() {
 
       if (IGNORED_KEYS.includes(key)) return
 
-      if (type === 'keydown') {
+      if (type === 'down') {
         pressedKeysRef.current.add(key)
         setPressedKeys(Array.from(pressedKeysRef.current))
 
@@ -61,7 +61,7 @@ export function useKeyboard() {
         }
 
         resetTypingTimeout()
-      } else if (type === 'keyup') {
+      } else if (type === 'up') {
         pressedKeysRef.current.delete(key)
         setPressedKeys(Array.from(pressedKeysRef.current))
       }

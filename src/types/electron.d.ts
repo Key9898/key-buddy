@@ -18,6 +18,8 @@ export interface ElectronAPI {
   startWindowDrag: (startX: number, startY: number) => Promise<boolean>
   moveWindowDrag: (currentX: number, currentY: number) => Promise<{ x: number; y: number } | null>
   endWindowDrag: () => Promise<{ x: number; y: number } | null>
+  minimizeWindow: () => Promise<boolean>
+  showWindow: () => Promise<boolean>
   getMonitors: () => Promise<Monitor[]>
   getSettings: () => Promise<Settings>
   setSettings: (settings: Partial<Settings>) => Promise<Settings>

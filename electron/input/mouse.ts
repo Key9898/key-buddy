@@ -1,4 +1,5 @@
 import type { BrowserWindow } from 'electron'
+import type { UioHookNapi } from 'uiohook-napi'
 
 export interface MouseEventPayload {
   x: number
@@ -10,7 +11,11 @@ export interface MouseEventPayload {
 
 type MouseCallback = (event: MouseEventPayload) => void
 
-let uiohook: typeof import('uiohook-napi') | null = null
+interface UiohookModule {
+  uIOHook: UioHookNapi
+}
+
+let uiohook: UiohookModule | null = null
 let isRunning = false
 let callback: MouseCallback | null = false as unknown as MouseCallback
 let lastMoveTime = 0

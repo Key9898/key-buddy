@@ -1,4 +1,5 @@
 import type { BrowserWindow } from 'electron'
+import type { UioHookNapi } from 'uiohook-napi'
 
 export interface KeyboardEventPayload {
   key: string
@@ -8,7 +9,11 @@ export interface KeyboardEventPayload {
 
 type KeyboardCallback = (event: KeyboardEventPayload) => void
 
-let uiohook: typeof import('uiohook-napi') | null = null
+interface UiohookModule {
+  uIOHook: UioHookNapi
+}
+
+let uiohook: UiohookModule | null = null
 let isRunning = false
 let callback: KeyboardCallback | null = null
 
